@@ -1,11 +1,16 @@
-﻿typedef struct {
-	double r;       // ∈ [0, 1]
-	double g;       // ∈ [0, 1]
-	double b;       // ∈ [0, 1]
-} rgb;
+﻿struct ButtonState {
+	bool is_down;
+	bool changed;
+};
 
-typedef struct {
-	double h;       // ∈ [0, 360]
-	double s;       // ∈ [0, 1]
-	double v;       // ∈ [0, 1]
-} hsv;
+enum {
+	BUTTON_UP,
+	BUTTON_DOWN,
+	BUTTON_LEFT,
+	BUTTON_RIGHT,
+	BUTTON_COUNT
+};
+
+struct Input {
+	ButtonState buttons[BUTTON_COUNT];
+};
