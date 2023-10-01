@@ -1,3 +1,3 @@
 #pragma once
 
-int limit (int value, int min, int max);
+float limit(float value, float min, int max);
