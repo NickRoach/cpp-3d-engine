@@ -4,6 +4,7 @@
 #include "clearScreen.h"
 #include "drawRect.h"
 #include "limit.h"
+#include "constants.h"
 
 bool running = true;
 void *buffer_memory;
@@ -71,14 +72,12 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int n
 	// register class
 	RegisterClassW(&window_class);
 
-	const long windowWidth = 1600;
-	const long windowHeight = 900;
-
 	// create window
 	HWND window = CreateWindowW(window_class.lpszClassName, L"Window with C++", WS_OVERLAPPEDWINDOW | WS_VISIBLE, CW_USEDEFAULT, CW_USEDEFAULT, 1280, 720, 0, 0, hInstance, 0);
 	{
 		// remove the title bar
 		// SetWindowLong(window, GWL_STYLE, GetWindowLong(window, GWL_STYLE) & ~WS_OVERLAPPEDWINDOW);
+
 		// center the window on the screen and set the size
 		MONITORINFO mi = {sizeof(mi)};
 		GetMonitorInfo(MonitorFromWindow(window, MONITOR_DEFAULTTOPRIMARY), &mi);
@@ -87,15 +86,6 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int n
 		SetWindowPos(window, HWND_TOP, mi.rcMonitor.left + monitorWidth / 2 - windowWidth / 2, mi.rcMonitor.top + monitorHeight / 2 - windowHeight / 2, windowWidth, windowHeight, SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
 	}
 	HDC hdc = GetDC(window);
-
-	const int backgroundColor = 0x000000;
-	const int squareColor = 0x009900;
-	const int squareWidth = 69;
-	const int squareHeight = 69;
-	float squareX = buffer_width / 2 - squareWidth / 2;
-	float squareY = buffer_height / 2 - squareHeight / 2;
-
-	Input input = {};
 
 	float delta_time = 0.016666f;
 	LARGE_INTEGER frame_begin_time;
@@ -107,6 +97,10 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int n
 		QueryPerformanceFrequency(&perf);
 		performance_frequency = (float)perf.QuadPart;
 	}
+
+	float squareX = buffer_width / 2 - squareWidth / 2;
+	float squareY = buffer_height / 2 - squareHeight / 2;
+	Input input = {};
 
 	while (running)
 	{
