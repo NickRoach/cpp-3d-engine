@@ -2,7 +2,7 @@
 #include "constants.h"
 #include "limit.h"
 
-void moveSquare(float &x, float &y, Input input, float dt, int buffer_height, int buffer_width)
+void moveSquare(float &x, float &y, Input input, float dt, int buffer_width, int buffer_height)
 {
     if (input.buttons[BUTTON_UP].is_down)
     {

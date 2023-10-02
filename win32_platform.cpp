@@ -9,6 +9,7 @@
 #include "drawLine.h"
 #include "drawPolygon.h"
 #include "drawPixel.h"
+#include "drawTriangle.h"
 
 bool running = true;
 void *buffer_memory;
@@ -16,6 +17,38 @@ int buffer_width;
 int buffer_height;
 int offset = 0;
 BITMAPINFO buffer_bitmap_info;
+
+Mesh meshCube;
+
+void populateMesh()
+{
+
+	meshCube.triangles = {
+		// south
+		{0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.f, 1.0f, 1.0f, 0.0f},
+		{0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.f, 1.0f, 0.0f, 0.0f},
+
+		// east
+		{1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f},
+		{1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f},
+
+		// north
+		{1.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f},
+		{1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f},
+
+		// west
+		{0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f},
+		{0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f},
+
+		// top
+		{0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f},
+		{0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f},
+
+		// bottom
+		{1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f},
+		{1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f},
+	};
+};
 
 LRESULT CALLBACK window_callback(
 	HWND hwnd,
@@ -95,6 +128,13 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int n
 	}
 	HDC hdc = GetDC(window);
 
+	// populateMesh();
+
+	// for (auto tri : meshCube.triangles)
+	// {
+	// drawTriangle(buffer_memory, buffer_width, buffer_height, tri, lineColor);
+	// }
+
 	float delta_time = 0.016666f;
 	LARGE_INTEGER frame_begin_time;
 	QueryPerformanceCounter(&frame_begin_time);
@@ -154,11 +194,11 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int n
 			}
 			}
 		}
-		moveSquare(squareX, squareY, input, delta_time, buffer_height, buffer_width);
-		clearScreen(buffer_memory, buffer_width, buffer_height, backgroundColor);
-		Coord coords[] = {{100, 100}, {100, 200}, {150, 150}, {200, 200}, {200, 100}};
 
-		drawPolygon(buffer_memory, buffer_width, buffer_height, coords, 5, lineColor);
+		moveSquare(squareX, squareY, input, delta_time, buffer_width, buffer_height);
+		clearScreen(buffer_memory, buffer_width, buffer_height, backgroundColor);
+		drawRect(buffer_memory, buffer_width, buffer_height, (int)squareX, (int)squareY, squareWidth, squareHeight, squareColor);
+		// drawPolygon(buffer_memory, buffer_width, buffer_height, coords, sizeof(coords) / sizeof(coords[0]), lineColor);
 		StretchDIBits(hdc, 0, 0, buffer_width, buffer_height, 0, 0, buffer_width, buffer_height, buffer_memory, &buffer_bitmap_info, DIB_RGB_COLORS, SRCCOPY);
 
 		LARGE_INTEGER frame_end_time;

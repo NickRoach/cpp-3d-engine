@@ -1,4 +1,7 @@
-﻿struct ButtonState
+﻿using namespace std;
+#include <vector>
+
+struct ButtonState
 {
 	bool is_down;
 	bool changed;
@@ -22,4 +25,19 @@ struct Coord
 {
 	int x;
 	int y;
+};
+
+struct Vec3d
+{
+	float x, y, z;
+};
+
+struct Triangle
+{
+	Vec3d p[3];
+};
+
+struct Mesh
+{
+	vector<Triangle> triangles;
 };
