@@ -5,8 +5,6 @@
 			"includePath": ["${default}"],
 			"defines": ["_DEBUG", "UNICODE", "_UNICODE"],
 			"windowsSdkVersion": "10.0.19041.0",
-			"cStandard": "c17",
-			"intelliSenseMode": "windows-gcc-x64",
 			"compilerPath": "C:/mingw64/bin/g++.exe"
 		}
 	],

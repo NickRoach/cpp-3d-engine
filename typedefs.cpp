@@ -1,5 +1,4 @@
-﻿using namespace std;
-#include <vector>
+﻿#include <vector>
 
 struct ButtonState
 {
@@ -39,5 +38,10 @@ struct Triangle
 
 struct Mesh
 {
-	vector<Triangle> triangles;
+	std::vector<Triangle> tris;
+};
+
+struct Matrix4x4
+{
+	float m[4][4] = {0};
 };

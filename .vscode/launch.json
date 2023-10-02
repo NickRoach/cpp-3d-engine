@@ -30,7 +30,7 @@
 					"ignoreFailures": true
 				}
 			],
-			"preLaunchTask": "g++.exe build active file"
+			"preLaunchTask": "g++.exe 13.2.0 build active file"
 		}
 	],
 	"version": "2.0.0"
