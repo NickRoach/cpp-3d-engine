@@ -12,6 +12,8 @@
 #include "drawTriangle.h"
 #include <vector>
 #include <math.h>
+#include <string>
+#include "fillTriangle.h"
 namespace std _GLIBCXX_VISIBILITY(default)
 {
 }
@@ -310,15 +312,19 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int n
 				triProjected.p[2].x *= 0.5f * (float)buffer_width;
 				triProjected.p[2].y *= 0.5f * (float)buffer_height;
 
-				drawTriangle(buffer_memory, buffer_width, buffer_height, triProjected, lineColor);
+				// drawTriangle(buffer_memory, buffer_width, buffer_height, triProjected, 0x0000ff);
+				fillTriangle(buffer_memory, buffer_width, buffer_height, triProjected, lineColor);
 			}
 		}
 
+		// fillTriangle(buffer_memory, buffer_width, buffer_height, {100, 100, 0, 200, 200, 0, 150, 300, 0}, 0xff0000);
+		// drawTriangle(buffer_memory, buffer_width, buffer_height, {100, 100, 0, 200, 200, 0, 150, 300, 0}, 0x0066ff);
 		StretchDIBits(hdc, 0, 0, buffer_width, buffer_height, 0, 0, buffer_width, buffer_height, buffer_memory, &buffer_bitmap_info, DIB_RGB_COLORS, SRCCOPY);
 
 		LARGE_INTEGER frame_end_time;
 		QueryPerformanceCounter(&frame_end_time);
 		delta_time = (float)(frame_end_time.QuadPart - frame_begin_time.QuadPart) / performance_frequency;
+		SetWindowTextA(window, std::to_string(1.0f / delta_time).c_str());
 		frame_begin_time = frame_end_time;
 	}
 	return 0;
