@@ -14,6 +14,8 @@
 #include <math.h>
 #include <string>
 #include "fillTriangle.h"
+#include "makeHsvData.h"
+#include "hsv2rgb.h"
 namespace std _GLIBCXX_VISIBILITY(default)
 {
 }
@@ -118,6 +120,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int n
 	}
 	HDC hdc = GetDC(window);
 
+	hsv boxColor = makeHsvData(cubeColor);
 	Mesh meshCube;
 
 	meshCube.tris = {
@@ -289,8 +292,10 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int n
 			normal.y /= l;
 			normal.z /= l;
 
+			float angleToViewer = normal.x * (triTranslated.p[0].x - vCamera.x) + normal.y * (triTranslated.p[0].y - vCamera.y) + normal.z * (triTranslated.p[0].z - vCamera.z);
+
 			// only draw triangles that are facing the screen
-			if (normal.x * (triTranslated.p[0].x - vCamera.x) + normal.y * (triTranslated.p[0].y - vCamera.y) + normal.z * (triTranslated.p[0].z - vCamera.z) < 0.0f)
+			if (angleToViewer < 0.0f)
 			{
 				// project triangles from 3d to 2d
 				MultiplyMatrixVector(triTranslated.p[0], triProjected.p[0], matProj);
@@ -312,8 +317,16 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int n
 				triProjected.p[2].x *= 0.5f * (float)buffer_width;
 				triProjected.p[2].y *= 0.5f * (float)buffer_height;
 
+				hsv darkenedColor = boxColor;
+
+				darkenedColor.v = (darkenedColor.v * 0.7) * (angleToViewer / -3) + darkenedColor.v * 0.3;
+
+				// SetWindowTextA(window, std::to_string(divisor).c_str());
+
+				int triColor = hsv2rgb(darkenedColor);
+
 				// drawTriangle(buffer_memory, buffer_width, buffer_height, triProjected, 0x0000ff);
-				fillTriangle(buffer_memory, buffer_width, buffer_height, triProjected, lineColor);
+				fillTriangle(buffer_memory, buffer_width, buffer_height, triProjected, triColor);
 			}
 		}
 
@@ -324,7 +337,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int n
 		LARGE_INTEGER frame_end_time;
 		QueryPerformanceCounter(&frame_end_time);
 		delta_time = (float)(frame_end_time.QuadPart - frame_begin_time.QuadPart) / performance_frequency;
-		SetWindowTextA(window, std::to_string(1.0f / delta_time).c_str());
+		// SetWindowTextA(window, std::to_string(1.0f / delta_time).c_str());
 		frame_begin_time = frame_end_time;
 	}
 	return 0;

@@ -6,3 +6,4 @@ const int lineColor = 0x00FF44;
 const int squareWidth = 69;
 const int squareHeight = 69;
 const int squareSpeed = 1;
+const int cubeColor = 250;
