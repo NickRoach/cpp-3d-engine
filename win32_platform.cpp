@@ -5,6 +5,7 @@
 #include "drawRect.h"
 #include "limit.h"
 #include "constants.h"
+#include "moveSquare.h"
 
 bool running = true;
 void *buffer_memory;
@@ -68,6 +69,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int n
 	window_class.lpszClassName = L"Window Class";
 	window_class.hCursor = LoadCursor(0, IDC_ARROW);
 	window_class.lpfnWndProc = window_callback;
+	ShowCursor(FALSE);
 
 	// register class
 	RegisterClassW(&window_class);
@@ -75,15 +77,18 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int n
 	// create window
 	HWND window = CreateWindowW(window_class.lpszClassName, L"Window with C++", WS_OVERLAPPEDWINDOW | WS_VISIBLE, CW_USEDEFAULT, CW_USEDEFAULT, 1280, 720, 0, 0, hInstance, 0);
 	{
-		// remove the title bar
-		// SetWindowLong(window, GWL_STYLE, GetWindowLong(window, GWL_STYLE) & ~WS_OVERLAPPEDWINDOW);
-
 		// center the window on the screen and set the size
 		MONITORINFO mi = {sizeof(mi)};
 		GetMonitorInfo(MonitorFromWindow(window, MONITOR_DEFAULTTOPRIMARY), &mi);
 		long monitorWidth = mi.rcMonitor.right - mi.rcMonitor.left;
 		long monitorHeight = mi.rcMonitor.bottom - mi.rcMonitor.top;
-		SetWindowPos(window, HWND_TOP, mi.rcMonitor.left + monitorWidth / 2 - windowWidth / 2, mi.rcMonitor.top + monitorHeight / 2 - windowHeight / 2, windowWidth, windowHeight, SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
+		// SetWindowPos(window, HWND_TOP, mi.rcMonitor.left + monitorWidth / 2 - windowWidth / 2, mi.rcMonitor.top + monitorHeight / 2 - windowHeight / 2, windowWidth, windowHeight, SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
+
+		// remove the title bar
+		SetWindowLong(window, GWL_STYLE, GetWindowLong(window, GWL_STYLE) & ~WS_OVERLAPPEDWINDOW);
+
+		// make fullscreen
+		SetWindowPos(window, HWND_TOP, mi.rcMonitor.left, mi.rcMonitor.top, mi.rcMonitor.right - mi.rcMonitor.left, mi.rcMonitor.bottom - mi.rcMonitor.top, SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
 	}
 	HDC hdc = GetDC(window);
 
@@ -146,22 +151,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int n
 			}
 			}
 		}
-		if (input.buttons[BUTTON_UP].is_down)
-		{
-			squareY = limit(squareY + (float)1000 * delta_time, 0, buffer_height - squareHeight);
-		}
-		if (input.buttons[BUTTON_DOWN].is_down)
-		{
-			squareY = limit(squareY - (float)1000 * delta_time, 0, buffer_height - squareHeight);
-		}
-		if (input.buttons[BUTTON_LEFT].is_down)
-		{
-			squareX = limit(squareX - (float)1000 * delta_time, 0, buffer_width - squareWidth);
-		}
-		if (input.buttons[BUTTON_RIGHT].is_down)
-		{
-			squareX = limit(squareX + (float)1000 * delta_time, 0, buffer_width - squareWidth);
-		}
+		moveSquare(squareX, squareY, input, delta_time, buffer_height, buffer_width);
 		clearScreen(buffer_memory, buffer_width, buffer_height, backgroundColor);
 		drawRect(buffer_memory, buffer_width, buffer_height, squareX, squareY, squareWidth, squareHeight, squareColor);
 		StretchDIBits(hdc, 0, 0, buffer_width, buffer_height, 0, 0, buffer_width, buffer_height, buffer_memory, &buffer_bitmap_info, DIB_RGB_COLORS, SRCCOPY);
