@@ -99,7 +99,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int n
 	RegisterClassW(&window_class);
 
 	// create window
-	HWND window = CreateWindowW(window_class.lpszClassName, L"Window with C++", WS_OVERLAPPEDWINDOW | WS_VISIBLE, CW_USEDEFAULT, CW_USEDEFAULT, 1280, 720, 0, 0, hInstance, 0);
+	HWND window = CreateWindowW(window_class.lpszClassName, L"C++ 3d Graphics Engine", WS_OVERLAPPEDWINDOW | WS_VISIBLE, CW_USEDEFAULT, CW_USEDEFAULT, 1280, 720, 0, 0, hInstance, 0);
 	{
 		// center the window on the screen and set the size
 		MONITORINFO mi = {sizeof(mi)};
@@ -228,20 +228,22 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int n
 		Matrix4x4 matRotZ, matRotX;
 		float fTheta = squareX;
 
+		Vec3d vCamera;
+
 		// rotaion z
-		matRotZ.m[0][0] = cosf(fTheta);
-		matRotZ.m[0][1] = sinf(fTheta);
-		matRotZ.m[1][0] = -sinf(fTheta);
-		matRotZ.m[1][1] = cosf(fTheta);
+		matRotZ.m[0][0] = cosf(squareX);
+		matRotZ.m[0][1] = sinf(squareX);
+		matRotZ.m[1][0] = -sinf(squareX);
+		matRotZ.m[1][1] = cosf(squareX);
 		matRotZ.m[2][2] = 1;
 		matRotZ.m[3][3] = 1;
 
 		// rotation x
 		matRotX.m[0][0] = 1;
-		matRotX.m[1][1] = cosf(fTheta * 0.5f);
-		matRotX.m[1][2] = sinf(fTheta * 0.5f);
-		matRotX.m[2][1] = -sinf(fTheta * 0.5f);
-		matRotX.m[2][2] = cosf(fTheta * 0.5f);
+		matRotX.m[1][1] = cosf(squareY);
+		matRotX.m[1][2] = sinf(squareY);
+		matRotX.m[2][1] = -sinf(squareY);
+		matRotX.m[2][2] = cosf(squareY);
 		matRotX.m[3][3] = 1;
 
 		// draw triangles
@@ -249,39 +251,67 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int n
 		{
 			Triangle triProjected, triTranslated, triRotatedZ, triRotatedZX;
 
+			// rotate in z axis
 			MultiplyMatrixVector(tri.p[0], triRotatedZ.p[0], matRotZ);
 			MultiplyMatrixVector(tri.p[1], triRotatedZ.p[1], matRotZ);
 			MultiplyMatrixVector(tri.p[2], triRotatedZ.p[2], matRotZ);
 
+			// rotate in x axis
 			MultiplyMatrixVector(triRotatedZ.p[0], triRotatedZX.p[0], matRotX);
 			MultiplyMatrixVector(triRotatedZ.p[1], triRotatedZX.p[1], matRotX);
 			MultiplyMatrixVector(triRotatedZ.p[2], triRotatedZX.p[2], matRotX);
 
+			// offset into the screen
 			triTranslated = triRotatedZX;
 			triTranslated.p[0].z = triRotatedZX.p[0].z + 3.0f;
 			triTranslated.p[1].z = triRotatedZX.p[1].z + 3.0f;
 			triTranslated.p[2].z = triRotatedZX.p[2].z + 3.0f;
 
-			MultiplyMatrixVector(triTranslated.p[0], triProjected.p[0], matProj);
-			MultiplyMatrixVector(triTranslated.p[1], triProjected.p[1], matProj);
-			MultiplyMatrixVector(triTranslated.p[2], triProjected.p[2], matProj);
+			// calculate normal
+			Vec3d normal, line1, line2;
+			line1.x = triTranslated.p[1].x - triTranslated.p[0].x;
+			line1.y = triTranslated.p[1].y - triTranslated.p[0].y;
+			line1.z = triTranslated.p[1].z - triTranslated.p[0].z;
 
-			// scale into view
-			triProjected.p[0].x += 1.0f;
-			triProjected.p[0].y += 1.0f;
-			triProjected.p[1].x += 1.0f;
-			triProjected.p[1].y += 1.0f;
-			triProjected.p[2].x += 1.0f;
-			triProjected.p[2].y += 1.0f;
+			line2.x = triTranslated.p[2].x - triTranslated.p[0].x;
+			line2.y = triTranslated.p[2].y - triTranslated.p[0].y;
+			line2.z = triTranslated.p[2].z - triTranslated.p[0].z;
 
-			triProjected.p[0].x *= 0.5f * (float)buffer_width;
-			triProjected.p[0].y *= 0.5f * (float)buffer_height;
-			triProjected.p[1].x *= 0.5f * (float)buffer_width;
-			triProjected.p[1].y *= 0.5f * (float)buffer_height;
-			triProjected.p[2].x *= 0.5f * (float)buffer_width;
-			triProjected.p[2].y *= 0.5f * (float)buffer_height;
+			// calculate normal with cross product
+			normal.x = line1.y * line2.z - line1.z * line2.y;
+			normal.y = line1.z * line2.x - line1.x * line2.z;
+			normal.z = line1.x * line2.y - line1.y * line2.x;
 
-			drawTriangle(buffer_memory, buffer_width, buffer_height, triProjected, 0xFFFFFF);
+			float l = sqrtf(normal.x * normal.x + normal.y * normal.y + normal.z * normal.z);
+			normal.x /= l;
+			normal.y /= l;
+			normal.z /= l;
+
+			// only draw triangles that are facing the screen
+			if (normal.x * (triTranslated.p[0].x - vCamera.x) + normal.y * (triTranslated.p[0].y - vCamera.y) + normal.z * (triTranslated.p[0].z - vCamera.z) < 0.0f)
+			{
+				// project triangles from 3d to 2d
+				MultiplyMatrixVector(triTranslated.p[0], triProjected.p[0], matProj);
+				MultiplyMatrixVector(triTranslated.p[1], triProjected.p[1], matProj);
+				MultiplyMatrixVector(triTranslated.p[2], triProjected.p[2], matProj);
+
+				// scale into view
+				triProjected.p[0].x += 1.0f;
+				triProjected.p[0].y += 1.0f;
+				triProjected.p[1].x += 1.0f;
+				triProjected.p[1].y += 1.0f;
+				triProjected.p[2].x += 1.0f;
+				triProjected.p[2].y += 1.0f;
+
+				triProjected.p[0].x *= 0.5f * (float)buffer_width;
+				triProjected.p[0].y *= 0.5f * (float)buffer_height;
+				triProjected.p[1].x *= 0.5f * (float)buffer_width;
+				triProjected.p[1].y *= 0.5f * (float)buffer_height;
+				triProjected.p[2].x *= 0.5f * (float)buffer_width;
+				triProjected.p[2].y *= 0.5f * (float)buffer_height;
+
+				drawTriangle(buffer_memory, buffer_width, buffer_height, triProjected, lineColor);
+			}
 		}
 
 		StretchDIBits(hdc, 0, 0, buffer_width, buffer_height, 0, 0, buffer_width, buffer_height, buffer_memory, &buffer_bitmap_info, DIB_RGB_COLORS, SRCCOPY);
