@@ -6,6 +6,7 @@
 #include "limit.h"
 #include "constants.h"
 #include "moveSquare.h"
+#include "drawLine.h"
 
 bool running = true;
 void *buffer_memory;
@@ -154,6 +155,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int n
 		moveSquare(squareX, squareY, input, delta_time, buffer_height, buffer_width);
 		clearScreen(buffer_memory, buffer_width, buffer_height, backgroundColor);
 		drawRect(buffer_memory, buffer_width, buffer_height, squareX, squareY, squareWidth, squareHeight, squareColor);
+		drawLine(buffer_memory, buffer_width, buffer_height, 0, 0, 100, 300, lineColor);
 		StretchDIBits(hdc, 0, 0, buffer_width, buffer_height, 0, 0, buffer_width, buffer_height, buffer_memory, &buffer_bitmap_info, DIB_RGB_COLORS, SRCCOPY);
 
 		LARGE_INTEGER frame_end_time;
