@@ -33,6 +33,8 @@ void drawLine(
         if (x >= 0 && x < buffer_width && y >= 0 && y < buffer_height)
         {
             drawPixel(buffer_memory, buffer_width, buffer_height, x, y, color);
+            drawPixel(buffer_memory, buffer_width, buffer_height, x + 1, y, color);
+            drawPixel(buffer_memory, buffer_width, buffer_height, x, y + 1, color);
         }
     }
 }

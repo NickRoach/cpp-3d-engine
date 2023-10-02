@@ -5,5 +5,6 @@ const int squareColor = 0x009900;
 const int lineColor = 0x00FF44;
 const int squareWidth = 69;
 const int squareHeight = 69;
-const int squareSpeed = 1;
+const int squareSpeed = 2;
 const int cubeColor = 250;
+const float fps = 60.0f;

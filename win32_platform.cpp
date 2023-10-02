@@ -224,121 +224,116 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int n
 			}
 			}
 		}
-		moveSquare(squareX, squareY, input, delta_time, buffer_width, buffer_height);
-		// clearScreen(buffer_memory, buffer_width, buffer_height, backgroundColor);
-		// drawRect(buffer_memory, buffer_width, buffer_height, (int)squareX, (int)squareY, squareWidth, squareHeight, squareColor);
-		// drawPolygon(buffer_memory, buffer_width, buffer_height, coords, sizeof(coords) / sizeof(coords[0]), lineColor);
-		clearScreen(buffer_memory, buffer_width, buffer_height, backgroundColor);
-
-		Matrix4x4 matRotZ, matRotX;
-		float fTheta = squareX;
-
-		Vec3d vCamera;
-
-		// rotaion z
-		matRotZ.m[0][0] = cosf(squareX);
-		matRotZ.m[0][1] = sinf(squareX);
-		matRotZ.m[1][0] = -sinf(squareX);
-		matRotZ.m[1][1] = cosf(squareX);
-		matRotZ.m[2][2] = 1;
-		matRotZ.m[3][3] = 1;
-
-		// rotation x
-		matRotX.m[0][0] = 1;
-		matRotX.m[1][1] = cosf(squareY);
-		matRotX.m[1][2] = sinf(squareY);
-		matRotX.m[2][1] = -sinf(squareY);
-		matRotX.m[2][2] = cosf(squareY);
-		matRotX.m[3][3] = 1;
-
-		// draw triangles
-		for (auto tri : meshCube.tris)
-		{
-			Triangle triProjected, triTranslated, triRotatedZ, triRotatedZX;
-
-			// rotate in z axis
-			MultiplyMatrixVector(tri.p[0], triRotatedZ.p[0], matRotZ);
-			MultiplyMatrixVector(tri.p[1], triRotatedZ.p[1], matRotZ);
-			MultiplyMatrixVector(tri.p[2], triRotatedZ.p[2], matRotZ);
-
-			// rotate in x axis
-			MultiplyMatrixVector(triRotatedZ.p[0], triRotatedZX.p[0], matRotX);
-			MultiplyMatrixVector(triRotatedZ.p[1], triRotatedZX.p[1], matRotX);
-			MultiplyMatrixVector(triRotatedZ.p[2], triRotatedZX.p[2], matRotX);
-
-			// offset into the screen
-			triTranslated = triRotatedZX;
-			triTranslated.p[0].z = triRotatedZX.p[0].z + 3.0f;
-			triTranslated.p[1].z = triRotatedZX.p[1].z + 3.0f;
-			triTranslated.p[2].z = triRotatedZX.p[2].z + 3.0f;
-
-			// calculate normal
-			Vec3d normal, line1, line2;
-			line1.x = triTranslated.p[1].x - triTranslated.p[0].x;
-			line1.y = triTranslated.p[1].y - triTranslated.p[0].y;
-			line1.z = triTranslated.p[1].z - triTranslated.p[0].z;
-
-			line2.x = triTranslated.p[2].x - triTranslated.p[0].x;
-			line2.y = triTranslated.p[2].y - triTranslated.p[0].y;
-			line2.z = triTranslated.p[2].z - triTranslated.p[0].z;
-
-			// calculate normal with cross product
-			normal.x = line1.y * line2.z - line1.z * line2.y;
-			normal.y = line1.z * line2.x - line1.x * line2.z;
-			normal.z = line1.x * line2.y - line1.y * line2.x;
-
-			float l = sqrtf(normal.x * normal.x + normal.y * normal.y + normal.z * normal.z);
-			normal.x /= l;
-			normal.y /= l;
-			normal.z /= l;
-
-			float angleToViewer = normal.x * (triTranslated.p[0].x - vCamera.x) + normal.y * (triTranslated.p[0].y - vCamera.y) + normal.z * (triTranslated.p[0].z - vCamera.z);
-
-			// only draw triangles that are facing the screen
-			if (angleToViewer < 0.0f)
-			{
-				// project triangles from 3d to 2d
-				MultiplyMatrixVector(triTranslated.p[0], triProjected.p[0], matProj);
-				MultiplyMatrixVector(triTranslated.p[1], triProjected.p[1], matProj);
-				MultiplyMatrixVector(triTranslated.p[2], triProjected.p[2], matProj);
-
-				// scale into view
-				triProjected.p[0].x += 1.0f;
-				triProjected.p[0].y += 1.0f;
-				triProjected.p[1].x += 1.0f;
-				triProjected.p[1].y += 1.0f;
-				triProjected.p[2].x += 1.0f;
-				triProjected.p[2].y += 1.0f;
-
-				triProjected.p[0].x *= 0.5f * (float)buffer_width;
-				triProjected.p[0].y *= 0.5f * (float)buffer_height;
-				triProjected.p[1].x *= 0.5f * (float)buffer_width;
-				triProjected.p[1].y *= 0.5f * (float)buffer_height;
-				triProjected.p[2].x *= 0.5f * (float)buffer_width;
-				triProjected.p[2].y *= 0.5f * (float)buffer_height;
-
-				hsv darkenedColor = boxColor;
-
-				darkenedColor.v = (darkenedColor.v * 0.7) * (angleToViewer / -3) + darkenedColor.v * 0.3;
-
-				// SetWindowTextA(window, std::to_string(divisor).c_str());
-
-				int triColor = hsv2rgb(darkenedColor);
-
-				// drawTriangle(buffer_memory, buffer_width, buffer_height, triProjected, 0x0000ff);
-				fillTriangle(buffer_memory, buffer_width, buffer_height, triProjected, triColor);
-			}
-		}
-
-		// fillTriangle(buffer_memory, buffer_width, buffer_height, {100, 100, 0, 200, 200, 0, 150, 300, 0}, 0xff0000);
-		// drawTriangle(buffer_memory, buffer_width, buffer_height, {100, 100, 0, 200, 200, 0, 150, 300, 0}, 0x0066ff);
-		StretchDIBits(hdc, 0, 0, buffer_width, buffer_height, 0, 0, buffer_width, buffer_height, buffer_memory, &buffer_bitmap_info, DIB_RGB_COLORS, SRCCOPY);
 
 		LARGE_INTEGER frame_end_time;
+		if (delta_time >= 1.0f / fps)
+
+		{
+			// SetWindowTextA(window, std::to_string(1.0f / delta_time).c_str());
+			frame_begin_time = frame_end_time;
+			moveSquare(squareX, squareY, input, delta_time, buffer_width, buffer_height);
+			clearScreen(buffer_memory, buffer_width, buffer_height, backgroundColor);
+
+			Matrix4x4 matRotZ, matRotX;
+			float fTheta = squareX;
+			Vec3d vCamera;
+
+			// rotaion z
+			matRotZ.m[0][0] = cosf(squareX);
+			matRotZ.m[0][1] = sinf(squareX);
+			matRotZ.m[1][0] = -sinf(squareX);
+			matRotZ.m[1][1] = cosf(squareX);
+			matRotZ.m[2][2] = 1;
+			matRotZ.m[3][3] = 1;
+
+			// rotation x
+			matRotX.m[0][0] = 1;
+			matRotX.m[1][1] = cosf(squareY);
+			matRotX.m[1][2] = sinf(squareY);
+			matRotX.m[2][1] = -sinf(squareY);
+			matRotX.m[2][2] = cosf(squareY);
+			matRotX.m[3][3] = 1;
+
+			// draw triangles
+			for (auto tri : meshCube.tris)
+			{
+				Triangle triProjected, triTranslated, triRotatedZ, triRotatedZX;
+
+				// rotate in z axis
+				MultiplyMatrixVector(tri.p[0], triRotatedZ.p[0], matRotZ);
+				MultiplyMatrixVector(tri.p[1], triRotatedZ.p[1], matRotZ);
+				MultiplyMatrixVector(tri.p[2], triRotatedZ.p[2], matRotZ);
+
+				// rotate in x axis
+				MultiplyMatrixVector(triRotatedZ.p[0], triRotatedZX.p[0], matRotX);
+				MultiplyMatrixVector(triRotatedZ.p[1], triRotatedZX.p[1], matRotX);
+				MultiplyMatrixVector(triRotatedZ.p[2], triRotatedZX.p[2], matRotX);
+
+				// offset into the screen
+				triTranslated = triRotatedZX;
+				triTranslated.p[0].z = triRotatedZX.p[0].z + 3.0f;
+				triTranslated.p[1].z = triRotatedZX.p[1].z + 3.0f;
+				triTranslated.p[2].z = triRotatedZX.p[2].z + 3.0f;
+
+				// calculate normal
+				Vec3d normal, line1, line2;
+				line1.x = triTranslated.p[1].x - triTranslated.p[0].x;
+				line1.y = triTranslated.p[1].y - triTranslated.p[0].y;
+				line1.z = triTranslated.p[1].z - triTranslated.p[0].z;
+
+				line2.x = triTranslated.p[2].x - triTranslated.p[0].x;
+				line2.y = triTranslated.p[2].y - triTranslated.p[0].y;
+				line2.z = triTranslated.p[2].z - triTranslated.p[0].z;
+
+				// calculate normal with cross product
+				normal.x = line1.y * line2.z - line1.z * line2.y;
+				normal.y = line1.z * line2.x - line1.x * line2.z;
+				normal.z = line1.x * line2.y - line1.y * line2.x;
+
+				float l = sqrtf(normal.x * normal.x + normal.y * normal.y + normal.z * normal.z);
+				normal.x /= l;
+				normal.y /= l;
+				normal.z /= l;
+
+				float angleToViewer = normal.x * (triTranslated.p[0].x - vCamera.x) + normal.y * (triTranslated.p[0].y - vCamera.y) + normal.z * (triTranslated.p[0].z - vCamera.z);
+
+				// only draw triangles that are facing the screen
+				if (angleToViewer < 0.0f)
+				{
+					// project triangles from 3d to 2d
+					MultiplyMatrixVector(triTranslated.p[0], triProjected.p[0], matProj);
+					MultiplyMatrixVector(triTranslated.p[1], triProjected.p[1], matProj);
+					MultiplyMatrixVector(triTranslated.p[2], triProjected.p[2], matProj);
+
+					// scale into view
+					triProjected.p[0].x += 1.0f;
+					triProjected.p[0].y += 1.0f;
+					triProjected.p[1].x += 1.0f;
+					triProjected.p[1].y += 1.0f;
+					triProjected.p[2].x += 1.0f;
+					triProjected.p[2].y += 1.0f;
+
+					triProjected.p[0].x *= 0.5f * (float)buffer_width;
+					triProjected.p[0].y *= 0.5f * (float)buffer_height;
+					triProjected.p[1].x *= 0.5f * (float)buffer_width;
+					triProjected.p[1].y *= 0.5f * (float)buffer_height;
+					triProjected.p[2].x *= 0.5f * (float)buffer_width;
+					triProjected.p[2].y *= 0.5f * (float)buffer_height;
+
+					hsv darkenedColor = boxColor;
+
+					darkenedColor.v = (darkenedColor.v * 0.7) * (angleToViewer / -3) + darkenedColor.v * 0.3;
+
+					int triColor = hsv2rgb(darkenedColor);
+
+					drawTriangle(buffer_memory, buffer_width, buffer_height, triProjected, triColor);
+					fillTriangle(buffer_memory, buffer_width, buffer_height, triProjected, triColor);
+				}
+			}
+			StretchDIBits(hdc, 0, 0, buffer_width, buffer_height, 0, 0, buffer_width, buffer_height, buffer_memory, &buffer_bitmap_info, DIB_RGB_COLORS, SRCCOPY);
+		}
 		QueryPerformanceCounter(&frame_end_time);
 		delta_time = (float)(frame_end_time.QuadPart - frame_begin_time.QuadPart) / performance_frequency;
-		// SetWindowTextA(window, std::to_string(1.0f / delta_time).c_str());
-		frame_begin_time = frame_end_time;
 	}
 	return 0;
 };
