@@ -1,9 +1,11 @@
-﻿struct ButtonState {
+﻿struct ButtonState
+{
 	bool is_down;
 	bool changed;
 };
 
-enum {
+enum
+{
 	BUTTON_UP,
 	BUTTON_DOWN,
 	BUTTON_LEFT,
@@ -11,6 +13,13 @@ enum {
 	BUTTON_COUNT
 };
 
-struct Input {
+struct Input
+{
 	ButtonState buttons[BUTTON_COUNT];
+};
+
+struct Coord
+{
+	int x;
+	int y;
 };

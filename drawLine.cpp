@@ -1,4 +1,5 @@
 #include "math.h"
+#include "drawPixel.h"
 
 void drawLine(
     void *buffer_memory,
@@ -10,6 +11,8 @@ void drawLine(
     int y1,
     unsigned int color)
 {
+    float x = x0;
+    float y = y0;
     int steps;
     int dx = x1 - x0;
     int dy = y1 - y0;
@@ -23,20 +26,13 @@ void drawLine(
     }
     float Xincrement = dx / (float)steps;
     float Yincrement = dy / (float)steps;
-
-    float x;
-    float y;
     for (int v = 0; v < steps; v++)
     {
         x = x + Xincrement;
         y = y + Yincrement;
         if (x >= 0 && x < buffer_width && y >= 0 && y < buffer_height)
         {
-            unsigned char *row = (unsigned char *)buffer_memory;
-            row += (int)y * buffer_width * sizeof(unsigned int);
-            row += (int)x * sizeof(unsigned int);
-            unsigned int *pixel = (unsigned int *)row;
-            *pixel = color;
+            drawPixel(buffer_memory, buffer_width, buffer_height, x, y, color);
         }
     }
 }
