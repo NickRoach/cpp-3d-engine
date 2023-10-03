@@ -43,15 +43,6 @@ void fillTriangle(void *buffer_memory, int buffer_width, int buffer_height, Tria
     int steps02 = abs(dy2);
     float Xincrement02 = dx2 / (float)steps02;
 
-    // 0, 1: red
-    // drawLine(buffer_memory, buffer_width, buffer_height, tri.p[0].x, tri.p[0].y, tri.p[1].x, tri.p[1].y, 0xff0000);
-
-    // // 1, 2: green
-    // drawLine(buffer_memory, buffer_width, buffer_height, tri.p[1].x, tri.p[1].y, tri.p[2].x, tri.p[2].y, 0x00ff00);
-
-    // // 0, 2: blue
-    // drawLine(buffer_memory, buffer_width, buffer_height, tri.p[0].x, tri.p[0].y, tri.p[2].x, tri.p[2].y, 0x0000ff);
-
     // draw bottom half of triangle
     for (int i = 0; i <= steps01; i++)
     {
@@ -67,10 +58,4 @@ void fillTriangle(void *buffer_memory, int buffer_width, int buffer_height, Tria
         float y = tri.p[2].y - i;
         drawLine(buffer_memory, buffer_width, buffer_height, x - 1, y, x - (Xincrement02 - Xincrement12) * i, y, color);
     }
-
-    // drawLine(buffer_memory, buffer_width, buffer_height, tri.p[0].x, tri.p[0].y, tri.p[1].x, tri.p[1].y, 0xff0000);
-    // drawLine(buffer_memory, buffer_width, buffer_height, tri.p[1].x, tri.p[1].y, tri.p[2].x, tri.p[2].y, 0x00ff00);
-
-    // drawLine(buffer_memory, buffer_width, buffer_height, tri.p[2].x, tri.p[2].y, tri.p[0].x, tri.p[0].y, 0x0000ff);
-    // blue is the uninterrupted side
 }
