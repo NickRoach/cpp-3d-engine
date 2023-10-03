@@ -337,8 +337,8 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int n
 
 					int triColor = hsv2rgb(darkenedColor);
 
-					drawTriangle(buffer_memory, buffer_width, buffer_height, triProjected, triColor);
 					fillTriangle(buffer_memory, buffer_width, buffer_height, triProjected, triColor);
+					drawTriangle(buffer_memory, buffer_width, buffer_height, triProjected, 0x007700);
 				}
 			}
 			StretchDIBits(hdc, 0, 0, buffer_width, buffer_height, 0, 0, buffer_width, buffer_height, buffer_memory, &buffer_bitmap_info, DIB_RGB_COLORS, SRCCOPY);
