@@ -24,6 +24,7 @@ bool running = true;
 void *buffer_memory;
 int buffer_width;
 int buffer_height;
+float fAspectRatio;
 int offset = 0;
 BITMAPINFO buffer_bitmap_info;
 
@@ -50,7 +51,7 @@ LRESULT CALLBACK window_callback(
 		GetClientRect(hwnd, &rect);
 		buffer_width = rect.right - rect.left;
 		buffer_height = rect.bottom - rect.top;
-
+		fAspectRatio = (float)buffer_height / (float)buffer_width;
 		int buffer_size = buffer_width * buffer_height * sizeof(unsigned int);
 
 		if (buffer_memory)
@@ -152,18 +153,10 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int n
 	// projection matrix
 	float fNear = 0.1f;
 	float fFar = 1000.0f;
-	float fFov = 90.0f;
-	float fAspectRatio = (float)buffer_height / (float)buffer_width;
+	float fFov = 60.0f;
 	float fFovRad = 1.0f / tanf(fFov * 0.5f / 180.0f * 3.14159f);
 
 	Matrix4x4 matProj;
-
-	matProj.m[0][0] = fAspectRatio * fFovRad;
-	matProj.m[1][1] = fFovRad;
-	matProj.m[2][2] = fFar / (fFar - fNear);
-	matProj.m[3][2] = (-fFar * fNear) / (fFar - fNear);
-	matProj.m[2][3] = 1.0f;
-	matProj.m[3][3] = 0.0f;
 
 	float delta_time = 0.016666f;
 	LARGE_INTEGER frame_begin_time;
@@ -176,8 +169,8 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int n
 		performance_frequency = (float)perf.QuadPart;
 	}
 
-	float squareX = buffer_width / 2 - squareWidth / 2;
-	float squareY = buffer_height / 2 - squareHeight / 2;
+	float squareX = 3.14159 / 3.0f;
+	float squareY = 3.14159 / 3.0f;
 	Input input = {};
 
 	while (running)
@@ -229,9 +222,18 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int n
 		if (delta_time >= 1.0f / fps)
 
 		{
-			// SetWindowTextA(window, std::to_string(1.0f / delta_time).c_str());
+
+			matProj.m[0][0] = fAspectRatio * fFovRad;
+			matProj.m[1][1] = fFovRad;
+			matProj.m[2][2] = fFar / (fFar - fNear);
+			matProj.m[3][2] = (-fFar * fNear) / (fFar - fNear);
+			matProj.m[2][3] = 1.0f;
+			matProj.m[3][3] = 0.0f;
+
 			frame_begin_time = frame_end_time;
-			moveSquare(squareX, squareY, input, delta_time, buffer_width, buffer_height);
+			// moveSquare(squareX, squareY, input, delta_time);
+			moveSquare(squareX, squareY, input, delta_time);
+			// SetWindowTextA(window, std::to_string(squareX).c_str());
 			clearScreen(buffer_memory, buffer_width, buffer_height, backgroundColor);
 
 			Matrix4x4 matRotZ, matRotX;
