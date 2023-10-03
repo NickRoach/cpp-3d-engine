@@ -3,7 +3,7 @@
 #include "winuser.h"
 #include "clearScreen.h"
 #include "constants.h"
-#include "moveSquare.h"
+#include "rotateCube.h"
 #include "drawLine.h"
 #include "drawPixel.h"
 #include "drawTriangle.h"
@@ -214,10 +214,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int n
 			matProj.m[3][3] = 0.0f;
 
 			frame_begin_time = frame_end_time;
-			// moveSquare(squareX, squareY, input, delta_time);
-			moveSquare(squareX, squareY, input, delta_time);
-			// SetWindowTextA(window, std::to_string(squareX).c_str());
-			clearScreen(buffer_memory, buffer_width, buffer_height, backgroundColor);
+			rotateCube(squareX, squareY, input, delta_time);
 
 			Matrix4x4 matRotZ, matRotX;
 			float fTheta = squareX;
@@ -238,6 +235,8 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int n
 			matRotX.m[2][1] = -sinf(squareY);
 			matRotX.m[2][2] = cosf(squareY);
 			matRotX.m[3][3] = 1;
+
+			clearScreen(buffer_memory, buffer_width, buffer_height, backgroundColor);
 
 			// draw triangles
 			for (auto tri : meshCube.tris)
@@ -324,7 +323,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int n
 					int triColor = hsv2rgb(darkenedColor);
 
 					fillTriangle(buffer_memory, buffer_width, buffer_height, triProjected, triColor);
-					drawTriangle(buffer_memory, buffer_width, buffer_height, triProjected, 0x007700);
+					drawTriangle(buffer_memory, buffer_width, buffer_height, triProjected, lineColor);
 				}
 			}
 			StretchDIBits(hdc, 0, 0, buffer_width, buffer_height, 0, 0, buffer_width, buffer_height, buffer_memory, &buffer_bitmap_info, DIB_RGB_COLORS, SRCCOPY);
