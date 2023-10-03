@@ -2,12 +2,9 @@
 #include "typedefs.h"
 #include "winuser.h"
 #include "clearScreen.h"
-#include "drawRect.h"
-#include "limit.h"
 #include "constants.h"
 #include "moveSquare.h"
 #include "drawLine.h"
-#include "drawPolygon.h"
 #include "drawPixel.h"
 #include "drawTriangle.h"
 #include <vector>
