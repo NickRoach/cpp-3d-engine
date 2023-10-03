@@ -103,13 +103,13 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int n
 	RegisterClassW(&window_class);
 
 	// create window
-	HWND window = CreateWindowW(window_class.lpszClassName, L"C++ 3d Graphics Engine", WS_OVERLAPPEDWINDOW | WS_VISIBLE, CW_USEDEFAULT, CW_USEDEFAULT, 1280, 720, 0, 0, hInstance, 0);
+	HWND window = CreateWindowW(window_class.lpszClassName, L"C++ 3d Graphics Engine", WS_OVERLAPPEDWINDOW | WS_MAXIMIZE | WS_VISIBLE, CW_USEDEFAULT, CW_USEDEFAULT, 1280, 720, 0, 0, hInstance, 0);
 	{
 		// center the window on the screen and set the size
-		MONITORINFO mi = {sizeof(mi)};
-		GetMonitorInfo(MonitorFromWindow(window, MONITOR_DEFAULTTOPRIMARY), &mi);
-		long monitorWidth = mi.rcMonitor.right - mi.rcMonitor.left;
-		long monitorHeight = mi.rcMonitor.bottom - mi.rcMonitor.top;
+		// MONITORINFO mi = {sizeof(mi)};
+		// GetMonitorInfo(MonitorFromWindow(window, MONITOR_DEFAULTTOPRIMARY), &mi);
+		// long monitorWidth = mi.rcMonitor.right - mi.rcMonitor.left;
+		// long monitorHeight = mi.rcMonitor.bottom - mi.rcMonitor.top;
 		// SetWindowPos(window, HWND_TOP, mi.rcMonitor.left + monitorWidth / 2 - windowWidth / 2, mi.rcMonitor.top + monitorHeight / 2 - windowHeight / 2, windowWidth, windowHeight, SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
 
 		// remove the title bar
@@ -257,12 +257,24 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int n
 			// draw triangles
 			for (auto tri : meshCube.tris)
 			{
-				Triangle triProjected, triTranslated, triRotatedZ, triRotatedZX;
+				Triangle triProjected, triTranslated, triRotatedZ, triRotatedZX, triPreTranslated;
+
+				// translate the cube so the origin is at its center
+				triPreTranslated = tri;
+				triPreTranslated.p[0].x = tri.p[0].x - 0.5f;
+				triPreTranslated.p[1].x = tri.p[1].x - 0.5f;
+				triPreTranslated.p[2].x = tri.p[2].x - 0.5f;
+				triPreTranslated.p[0].y = tri.p[0].y - 0.5f;
+				triPreTranslated.p[1].y = tri.p[1].y - 0.5f;
+				triPreTranslated.p[2].y = tri.p[2].y - 0.5f;
+				triPreTranslated.p[0].z = tri.p[0].z - 0.5f;
+				triPreTranslated.p[1].z = tri.p[1].z - 0.5f;
+				triPreTranslated.p[2].z = tri.p[2].z - 0.5f;
 
 				// rotate in z axis
-				MultiplyMatrixVector(tri.p[0], triRotatedZ.p[0], matRotZ);
-				MultiplyMatrixVector(tri.p[1], triRotatedZ.p[1], matRotZ);
-				MultiplyMatrixVector(tri.p[2], triRotatedZ.p[2], matRotZ);
+				MultiplyMatrixVector(triPreTranslated.p[0], triRotatedZ.p[0], matRotZ);
+				MultiplyMatrixVector(triPreTranslated.p[1], triRotatedZ.p[1], matRotZ);
+				MultiplyMatrixVector(triPreTranslated.p[2], triRotatedZ.p[2], matRotZ);
 
 				// rotate in x axis
 				MultiplyMatrixVector(triRotatedZ.p[0], triRotatedZX.p[0], matRotX);
