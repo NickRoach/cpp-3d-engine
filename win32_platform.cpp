@@ -1,6 +1,7 @@
 ﻿#include <windows.h>
 #include "typedefs.h"
 #include "winuser.h"
+#include <algorithm>
 #include "clearScreen.h"
 #include "constants.h"
 #include "rotateCube.h"
@@ -104,7 +105,6 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int n
 	HWND window = CreateWindowW(window_class.lpszClassName, L"C++ 3d Graphics Engine", WS_OVERLAPPEDWINDOW | WS_MAXIMIZE | WS_VISIBLE, CW_USEDEFAULT, CW_USEDEFAULT, 1280, 720, 0, 0, hInstance, 0);
 	HDC hdc = GetDC(window);
 
-	hsv boxColor = makeHsvData(cubeColor);
 	Mesh meshCube;
 
 	// projection matrix
@@ -126,35 +126,11 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int n
 		performance_frequency = (float)perf.QuadPart;
 	}
 
-	float rotateX = 3.14159 / 3.0f;
-	float rotateZ = 3.14159 / 3.0f;
+	float rotateX = 0.0f;
+	float rotateZ = 0.0f;
 	Input input = {};
 
-	meshCube.tris = {
-		// south
-		{0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f},
-		{0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f},
-
-		// east
-		{1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f},
-		{1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f},
-
-		// north
-		{1.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f},
-		{1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f},
-
-		// west
-		{0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f},
-		{0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f},
-
-		// top
-		{0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f},
-		{0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f},
-
-		// bottom
-		{1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f},
-		{1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f},
-	};
+	meshCube.LoadFromObjectFile("teapot.obj");
 
 	while (running)
 	{
@@ -218,7 +194,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int n
 
 			Matrix4x4 matRotZ, matRotX;
 			float fTheta = rotateZ;
-			Vec3d vCamera;
+			Vec3d vCamera = {0, 0, 0};
 
 			// rotaion z
 			matRotZ.m[0][0] = cosf(rotateZ);
@@ -238,27 +214,17 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int n
 
 			clearScreen(buffer_memory, buffer_width, buffer_height, backgroundColor);
 
+			vector<Triangle> vecTrianglesToRaster;
+
 			// draw triangles
 			for (auto tri : meshCube.tris)
 			{
-				Triangle triProjected, triTranslated, triRotatedZ, triRotatedZX, triPreTranslated;
-
-				// translate the cube so the origin is at its center
-				triPreTranslated = tri;
-				triPreTranslated.p[0].x = tri.p[0].x - 0.5f;
-				triPreTranslated.p[1].x = tri.p[1].x - 0.5f;
-				triPreTranslated.p[2].x = tri.p[2].x - 0.5f;
-				triPreTranslated.p[0].y = tri.p[0].y - 0.5f;
-				triPreTranslated.p[1].y = tri.p[1].y - 0.5f;
-				triPreTranslated.p[2].y = tri.p[2].y - 0.5f;
-				triPreTranslated.p[0].z = tri.p[0].z - 0.5f;
-				triPreTranslated.p[1].z = tri.p[1].z - 0.5f;
-				triPreTranslated.p[2].z = tri.p[2].z - 0.5f;
+				Triangle triProjected, triTranslated, triRotatedZ, triRotatedZX;
 
 				// rotate in z axis
-				MultiplyMatrixVector(triPreTranslated.p[0], triRotatedZ.p[0], matRotZ);
-				MultiplyMatrixVector(triPreTranslated.p[1], triRotatedZ.p[1], matRotZ);
-				MultiplyMatrixVector(triPreTranslated.p[2], triRotatedZ.p[2], matRotZ);
+				MultiplyMatrixVector(tri.p[0], triRotatedZ.p[0], matRotZ);
+				MultiplyMatrixVector(tri.p[1], triRotatedZ.p[1], matRotZ);
+				MultiplyMatrixVector(tri.p[2], triRotatedZ.p[2], matRotZ);
 
 				// rotate in x axis
 				MultiplyMatrixVector(triRotatedZ.p[0], triRotatedZX.p[0], matRotX);
@@ -267,9 +233,10 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int n
 
 				// offset into the screen
 				triTranslated = triRotatedZX;
-				triTranslated.p[0].z = triRotatedZX.p[0].z + 3.0f;
-				triTranslated.p[1].z = triRotatedZX.p[1].z + 3.0f;
-				triTranslated.p[2].z = triRotatedZX.p[2].z + 3.0f;
+				triTranslated.p[0].z = triRotatedZX.p[0].z + zOffset;
+				triTranslated.p[1].z = triRotatedZX.p[1].z + zOffset;
+				triTranslated.p[2].z = triRotatedZX.p[2].z + zOffset;
+				;
 
 				// calculate normal
 				Vec3d normal, line1, line2;
@@ -294,12 +261,32 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int n
 				float angleToViewer = normal.x * (triTranslated.p[0].x - vCamera.x) + normal.y * (triTranslated.p[0].y - vCamera.y) + normal.z * (triTranslated.p[0].z - vCamera.z);
 
 				// only draw triangles that are facing the screen
-				if (angleToViewer < 0.0f)
+				if (angleToViewer > 0.0f)
 				{
+					Vec3d light_direction = lightDirection;
+					float ll = sqrtf(light_direction.x * light_direction.x + light_direction.y * light_direction.y + light_direction.z * normal.z);
+					light_direction.x /= ll;
+					light_direction.y /= ll;
+					light_direction.z /= ll;
+
+					float dp = normal.x * light_direction.x + normal.y * light_direction.y + normal.z * light_direction.z;
+					hsv darkenedColor = modelColor;
+					if (dp > 0.0f)
+					{
+						darkenedColor.v = darkenedColor.v * (1 - darkenStrength) + darkenedColor.v * dp * darkenStrength;
+					}
+					else
+					{
+						darkenedColor.v = darkenedColor.v * (1 - darkenStrength);
+					}
+
+					triTranslated.color = hsv2rgb(darkenedColor);
+
 					// project triangles from 3d to 2d
 					MultiplyMatrixVector(triTranslated.p[0], triProjected.p[0], matProj);
 					MultiplyMatrixVector(triTranslated.p[1], triProjected.p[1], matProj);
 					MultiplyMatrixVector(triTranslated.p[2], triProjected.p[2], matProj);
+					triProjected.color = triTranslated.color;
 
 					// scale into view
 					triProjected.p[0].x += 1.0f;
@@ -316,15 +303,25 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int n
 					triProjected.p[2].x *= 0.5f * (float)buffer_width;
 					triProjected.p[2].y *= 0.5f * (float)buffer_height;
 
-					hsv darkenedColor = boxColor;
-
-					darkenedColor.v = (darkenedColor.v * 0.7) * (angleToViewer / -3) + darkenedColor.v * 0.3;
-
-					int triColor = hsv2rgb(darkenedColor);
-
-					fillTriangle(buffer_memory, buffer_width, buffer_height, triProjected, triColor);
-					drawTriangle(buffer_memory, buffer_width, buffer_height, triProjected, lineColor);
+					vecTrianglesToRaster.push_back(triProjected);
 				}
+			}
+
+			hsv lineColor = modelColor;
+			lineColor.v = lineColor.v * 0.6f;
+			int intLineColor = hsv2rgb(lineColor);
+
+			// sort triangles furthest to nearest
+			sort(vecTrianglesToRaster.begin(), vecTrianglesToRaster.end(), [](Triangle &t1, Triangle &t2)
+				 {
+				float z1 = (t1.p[0].z + t1.p[1].z + t1.p[2].z) / 3.0f;
+				float z2 = (t2.p[0].z + t2.p[1].z + t2.p[2].z) / 3.0f;
+				return z1 > z2; });
+
+			for (auto &triProjected : vecTrianglesToRaster)
+			{
+				fillTriangle(buffer_memory, buffer_width, buffer_height, triProjected, triProjected.color);
+				drawTriangle(buffer_memory, buffer_width, buffer_height, triProjected, intLineColor);
 			}
 			StretchDIBits(hdc, 0, 0, buffer_width, buffer_height, 0, 0, buffer_width, buffer_height, buffer_memory, &buffer_bitmap_info, DIB_RGB_COLORS, SRCCOPY);
 		}
