@@ -102,24 +102,33 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int n
 
 	// create window
 	HWND window = CreateWindowW(window_class.lpszClassName, L"C++ 3d Graphics Engine", WS_OVERLAPPEDWINDOW | WS_MAXIMIZE | WS_VISIBLE, CW_USEDEFAULT, CW_USEDEFAULT, 1280, 720, 0, 0, hInstance, 0);
-	{
-		// center the window on the screen and set the size
-		// MONITORINFO mi = {sizeof(mi)};
-		// GetMonitorInfo(MonitorFromWindow(window, MONITOR_DEFAULTTOPRIMARY), &mi);
-		// long monitorWidth = mi.rcMonitor.right - mi.rcMonitor.left;
-		// long monitorHeight = mi.rcMonitor.bottom - mi.rcMonitor.top;
-		// SetWindowPos(window, HWND_TOP, mi.rcMonitor.left + monitorWidth / 2 - windowWidth / 2, mi.rcMonitor.top + monitorHeight / 2 - windowHeight / 2, windowWidth, windowHeight, SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
-
-		// remove the title bar
-		// SetWindowLong(window, GWL_STYLE, GetWindowLong(window, GWL_STYLE) & ~WS_OVERLAPPEDWINDOW);
-
-		// make fullscreen
-		// SetWindowPos(window, HWND_TOP, mi.rcMonitor.left, mi.rcMonitor.top, mi.rcMonitor.right - mi.rcMonitor.left, mi.rcMonitor.bottom - mi.rcMonitor.top, SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
-	}
 	HDC hdc = GetDC(window);
 
 	hsv boxColor = makeHsvData(cubeColor);
 	Mesh meshCube;
+
+	// projection matrix
+	float fNear = 0.1f;
+	float fFar = 1000.0f;
+	float fFov = 60.0f;
+	float fFovRad = 1.0f / tanf(fFov * 0.5f / 180.0f * 3.14159f);
+
+	Matrix4x4 matProj;
+
+	float delta_time = 0.016666f;
+	LARGE_INTEGER frame_begin_time;
+	QueryPerformanceCounter(&frame_begin_time);
+
+	float performance_frequency;
+	{
+		LARGE_INTEGER perf;
+		QueryPerformanceFrequency(&perf);
+		performance_frequency = (float)perf.QuadPart;
+	}
+
+	float squareX = 3.14159 / 3.0f;
+	float squareY = 3.14159 / 3.0f;
+	Input input = {};
 
 	meshCube.tris = {
 		// south
@@ -146,29 +155,6 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int n
 		{1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f},
 		{1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f},
 	};
-
-	// projection matrix
-	float fNear = 0.1f;
-	float fFar = 1000.0f;
-	float fFov = 60.0f;
-	float fFovRad = 1.0f / tanf(fFov * 0.5f / 180.0f * 3.14159f);
-
-	Matrix4x4 matProj;
-
-	float delta_time = 0.016666f;
-	LARGE_INTEGER frame_begin_time;
-	QueryPerformanceCounter(&frame_begin_time);
-
-	float performance_frequency;
-	{
-		LARGE_INTEGER perf;
-		QueryPerformanceFrequency(&perf);
-		performance_frequency = (float)perf.QuadPart;
-	}
-
-	float squareX = 3.14159 / 3.0f;
-	float squareY = 3.14159 / 3.0f;
-	Input input = {};
 
 	while (running)
 	{

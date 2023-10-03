@@ -20,12 +20,6 @@ struct Input
 	ButtonState buttons[BUTTON_COUNT];
 };
 
-struct Coord
-{
-	int x;
-	int y;
-};
-
 struct Vec3d
 {
 	float x, y, z;
