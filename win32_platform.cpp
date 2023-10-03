@@ -214,26 +214,26 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int n
 			matProj.m[3][3] = 0.0f;
 
 			frame_begin_time = frame_end_time;
-			rotateCube(rotateX, rotateZ, input, delta_time);
+			rotateCube(rotateZ, rotateX, input, delta_time);
 
 			Matrix4x4 matRotZ, matRotX;
-			float fTheta = rotateX;
+			float fTheta = rotateZ;
 			Vec3d vCamera;
 
 			// rotaion z
-			matRotZ.m[0][0] = cosf(rotateX);
-			matRotZ.m[0][1] = sinf(rotateX);
-			matRotZ.m[1][0] = -sinf(rotateX);
-			matRotZ.m[1][1] = cosf(rotateX);
+			matRotZ.m[0][0] = cosf(rotateZ);
+			matRotZ.m[0][1] = sinf(rotateZ);
+			matRotZ.m[1][0] = -sinf(rotateZ);
+			matRotZ.m[1][1] = cosf(rotateZ);
 			matRotZ.m[2][2] = 1;
 			matRotZ.m[3][3] = 1;
 
 			// rotation x
 			matRotX.m[0][0] = 1;
-			matRotX.m[1][1] = cosf(rotateZ);
-			matRotX.m[1][2] = sinf(rotateZ);
-			matRotX.m[2][1] = -sinf(rotateZ);
-			matRotX.m[2][2] = cosf(rotateZ);
+			matRotX.m[1][1] = cosf(rotateX);
+			matRotX.m[1][2] = sinf(rotateX);
+			matRotX.m[2][1] = -sinf(rotateX);
+			matRotX.m[2][2] = cosf(rotateX);
 			matRotX.m[3][3] = 1;
 
 			clearScreen(buffer_memory, buffer_width, buffer_height, backgroundColor);
